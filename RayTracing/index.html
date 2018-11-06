@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>threejs-basic-geometry</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <nav class="navbar fixed-top navbar-expand-sm bg-dark navbar-dark">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">开始程序</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                    aria-expanded="false">设置</a>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">选择区域地图</button>
+                    <a class="dropdown-item" href="#">建筑设置</a>
+                    <a class="dropdown-item" href="#">街景设置</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">亮度设置</a>
+                    <a class="dropdown-item" href="#">鼠标灵敏度设置</a>
+                    <a class="dropdown-item" href="#">锁定地图显示</a>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">离开</a>
+            </li>
+        </ul>
+    </nav>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Open File</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Open</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script type="text/javascript" src="js/three.js"></script>
+    <script type="text/javascript" src="js/echarts.min.js"></script>
+    <script type="text/javascript" src="js/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="js/Detector.js"></script>
+    <script type="text/javascript" src="js/OrbitControls.js"></script>
+    <script type="text/javascript" src="js/TDSLoader.js"></script>
+    <script type="text/javascript" src="js/tether.min.js"></script>
+    <div id="webgl" class="card card-success" style="height:800px"></div>
+
+    <div class="container">
+        <div class="card card-success">
+            <div class="btn-group btn-group-sm">
+                <button id="pathloss" type="button" class="btn btn-primary">路径损耗</button>
+                <button id="powerdelay" type="button" class="btn btn-secondary">功率时延分布</button>
+                <button id="meandelay" type="button" class="btn btn-success">平均附加时延</button>
+                <button id="dimpowerdelay" type="button" class="btn btn-danger">功率时延空间分布</button>
+            </div>
+            <div id="main" style="height:350px"></div>
+        </div>
+
+        <div style="height: 400px" class="card card-success">
+            <table class="table table-hover">
+                <thead>
+                    <tr class="active">
+                        <th>Car ID</th>
+                        <th>RX</th>
+                        <th>Coordinate</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-success">
+                        <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                title="点击可以更新车辆状态">
+                                001
+                            </button></td>
+                        <td>True</td>
+                        <td>(13.5,6.2)</td>
+                        <td>A</td>
+                    </tr>
+                    <tr class="table-danger">
+                        <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                title="点击可以更新车辆状态">
+                                002
+                            </button></td>
+                        <td>False</td>
+                        <td>(14.5,7.5)</td>
+                        <td>A</td>
+                    </tr>
+                    <tr class="table-danger">
+                        <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                title="点击可以更新车辆状态">
+                                003
+                            </button></td>
+                        <td>False</td>
+                        <td>(17.7,5.2)</td>
+                        <td>A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var sendCode;
+        function debug(message) {
+            console.log(message);
+        }
+
+        function sendMessage(msg) {
+            if (websocket != null) {
+                websocket.send(msg);
+                console.log("string sent :", '"' + msg + '"');
+            } else {
+                initWebSocket();
+                websocket.send(msg);
+                console.log("string sent :", '"' + msg + '"');
+            }
+            sendCode = msg;
+            // stopWebSocket();
+        }
+
+        var wsUri = "ws://localhost:1234";
+        var websocket = null;
+        initWebSocket();
+
+        function initWebSocket() {
+            try {
+                if (typeof MozWebSocket == 'function')
+                    WebSocket = MozWebSocket;
+                if (websocket && websocket.readyState == 1)
+                    websocket.close();
+                websocket = new WebSocket(wsUri);
+                websocket.onopen = function (evt) {
+                    debug("CONNECTED");
+                };
+                websocket.onclose = function (evt) {
+                    debug("DISCONNECTED");
+                };
+                websocket.onmessage = function (evt) {
+                    console.log("Message received :", evt.data);
+                    if (sendCode == "1") {
+                        readFromDataToArray(evt.data);
+                        // var obj = JSON.parse(evt.data);
+                        // var pointX = [];
+                        // var pointY = [];
+                        // var pointZ = [];
+                        // for (var leng in obj) {
+                        //     var pointXX = [];
+                        //     var pointYY = [];
+                        //     var objxy = obj[leng].xy;
+                        //     for (var t in obj[leng].xy) {
+                        //         pointXX.push(objxy[t][0]);
+                        //         pointYY.push(objxy[t][1]);
+                        //     }
+                        //     pointX.push(pointXX);
+                        //     pointY.push(pointYY);
+                        //     pointZ.push(obj[leng].z);
+                        // }
+                    }
+                    console.log(pointX);
+                    for (var i = 0; i < pointX.length; i++) {
+                        addMulGeometry(pointX[i], pointY[i], pointZ[i]);
+                    }
+                    debug(evt.data);
+                };
+                websocket.onerror = function (evt) {
+                    debug('ERROR: ' + evt.data);
+                };
+            } catch (exception) {
+                debug('ERROR: ' + exception);
+            }
+        }
+
+        function stopWebSocket() {
+            if (websocket)
+                websocket.close();
+        }
+
+        function checkSocket() {
+            if (websocket != null) {
+                var stateStr;
+                switch (websocket.readyState) {
+                    case 0: {
+                        stateStr = "CONNECTING";
+                        break;
+                    }
+                    case 1: {
+                        stateStr = "OPEN";
+                        break;
+                    }
+                    case 2: {
+                        stateStr = "CLOSING";
+                        break;
+                    }
+                    case 3: {
+                        stateStr = "CLOSED";
+                        break;
+                    }
+                    default: {
+                        stateStr = "UNKNOW";
+                        break;
+                    }
+                }
+                debug("WebSocket state = " + websocket.readyState + " ( " + stateStr + " )");
+            } else {
+                debug("WebSocket is null");
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var button1 = document.getElementById("pathloss");
+        var button2 = document.getElementById("powerdelay");
+        var button3 = document.getElementById("meandelay");
+        var button4 = document.getElementById("dimpowerdelay");
+
+        var myChart = echarts.init(document.getElementById("main"));
+        button4.onclick = function (ev) {
+            loadDimenPowerDelay();
+        };
+        button3.onclick = function (ev) {
+            console.log("b3");
+            loadbutton2();
+        };
+
+
+
+        function loadbutton2() {
+            option = {
+                title: {
+                    text: '平均附加时延',
+                    subtext: '附加时延'
+                },
+                tooltip: {},
+                backgroundColor: '#fff',
+                visualMap: {
+                    show: false,
+                    dimension: 2,
+                    min: -1,
+                    max: 1,
+                    inRange: {
+                        color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                    }
+                },
+                xAxis3D: {
+                    type: 'value'
+                },
+                yAxis3D: {
+                    type: 'value'
+                },
+                zAxis3D: {
+                    type: 'value'
+                },
+                grid3D: {
+                    viewControl: {
+                        // projection: 'orthographic'
+                    }
+                },
+                series: [{
+                    type: 'surface',
+                    wireframe: {
+                        // show: false
+                    },
+                    equation: {
+                        x: {
+                            step: 0.05
+                        },
+                        y: {
+                            step: 0.05
+                        },
+                        z: function (x, y) {
+                            if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1) {
+                                return '-';
+                            }
+                            return Math.sin(x * Math.PI) * Math.sin(y * Math.PI);
+                        }
+                    }
+                }]
+            };
+            myChart.setOption(option);
+        }
+
+
+        function loadDimenPowerDelay() {
+            myChart.setOption({
+                title: {
+                    text: '功率时延空间分布',
+                    subtext: '功率时延空间分布'
+                },
+                grid3D: {},
+                xAxis3D: {},
+                yAxis3D: {},
+                zAxis3D: {},
+                series: [{
+                    type: 'scatter3D',
+                    symbolSize: 1,
+                    data: [
+                        [-1, -1, -1],
+                        [0, 0, 0],
+                        [1, 1, 1]
+                    ],
+                    itemStyle: {
+                        opacity: 1
+                    }
+                }]
+            });
+        }
+
+        function loadPathLoss(pathLossOrder, pathLoss) {
+            // 指定图表的配置项和数据
+            option = {
+                title: {
+                    text: 'Ray-Tracing 路径损耗',
+                    subtext: '路径损耗分布'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['路径损耗']
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        mark: {
+                            show: true
+                        },
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        magicType: {
+                            show: true,
+                            type: ['line', 'bar']
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                calculable: true,
+                xAxis: [{
+                    type: 'category',
+                    data: pathLossOrder
+                }],
+                yAxis: [{
+                    type: 'value'
+                }],
+                series: [{
+                    name: '路径损耗/dB',
+                    type: 'bar',
+                    data: pathLoss,
+                    markPoint: {
+                        data: [{
+                            type: 'max',
+                            name: '最大值'
+                        }, {
+                            type: 'min',
+                            name: '最小值'
+                        }]
+                    },
+                    markLine: {
+                        data: [{
+                            type: 'average',
+                            name: '平均值'
+                        }]
+                    }
+                }]
+            };
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        }
+    </script>
+    <script type="text/javascript">
+        //检测webgl的支持情况
+        if (!Detector.webgl) {
+            Detector.addGetWebGLMessage();
+        }
+
+        var container;
+        var camera, scene, renderer;
+        //用于轨道控制器
+        var orbitControls, clock, delta;
+        //loadXMLDoc();
+        main();
+        render();
+        loadPathLoss([1, 2, 3, 4, 5, 6], [-100, -101, -102, -103, -99, -98]);
+
+        function readFromDataToArray(result) {
+            var obj = JSON.parse(result);
+            console.log(obj[0][0].x)
+            console.log(obj[0][0].y)
+            //console.log(obj.length)
+            var pointX = [];
+            var pointY = [];
+            var pointZ = [];
+            for (var i = 0; i < 261; i++) {
+                var pointXX = [];
+                var pointYY = [];
+                for (var j = obj[i].length - 1; j >= 0; j--) {
+                    pointXX.push(obj[i][j].x);
+                    pointYY.push(obj[i][j].y);
+                }
+                pointX.push(pointXX);
+                pointY.push(pointYY);
+                pointZ.push(obj[i][0].z);
+            }
+            for (var i = 0; i < pointX.length; i++) {
+                addMulGeometry(pointX[i], pointY[i], pointZ[i]);
+            }
+        }
+
+        function loadPathLossGet() {
+            var xmlhttp;
+            if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp = new XMLHttpRequest();
+            } else { // code for IE6, IE5
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var result = xmlhttp.responseText;
+                    console.log(result);
+                    //document.getElementById("myDiv").innerHTML=result;
+                    var obj = JSON.parse(result);
+                    console.log(obj.length);
+                    var pathLossT = [];
+                    var pathLossOrder = [];
+                    for (var i = 0; i < obj.length; i++) {
+                        pathLossT.push(obj[i]);
+                        pathLossOrder.push(i);
+                    }
+                    //loadDimenPowerDelay();
+                    loadPathLoss(pathLossOrder, pathLossT);
+                }
+            }
+            xmlhttp.open("GET", "http://localhost:8080/user/getPathLoss.html", true);
+            xmlhttp.send();
+        }
+
+        //主函数
+        function loadXMLDoc() {
+            var xmlhttp;
+            if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp = new XMLHttpRequest();
+            } else { // code for IE6, IE5
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var result = xmlhttp.responseText;
+                    //document.getElementById("myDiv").innerHTML=result;
+                    var obj = JSON.parse(result);
+                    console.log(obj[0][0].x)
+                    console.log(obj[0][0].y)
+                    //console.log(obj.length)
+                    var pointX = [];
+                    var pointY = [];
+                    var pointZ = [];
+                    for (var i = 0; i < 261; i++) {
+                        var pointXX = [];
+                        var pointYY = [];
+                        for (var j = obj[i].length - 1; j >= 0; j--) {
+                            pointXX.push(obj[i][j].x);
+                            pointYY.push(obj[i][j].y);
+                        }
+                        pointX.push(pointXX);
+                        pointY.push(pointYY);
+                        pointZ.push(obj[i][0].z);
+                    }
+                    main(pointX, pointY, pointZ);
+                    render();
+                    loadPathLossGet();
+
+                    //alert(obj[0].length);
+                }
+            }
+            xmlhttp.open("GET", "http://localhost:8080/user/hello.html", true);
+            xmlhttp.send();
+        }
+
+        function load3DS(pX, pY, pZ, dirY) {
+            var loader = new THREE.TDSLoader();
+
+            loader.load("./Evo.3ds", function (object) {
+                object.traverse(function (child) {
+                    if (child instanceof THREE.Mesh) {
+                        child.material.side = THREE.DoubleSide;
+                        //child.material.normalMap = normal;
+                    }
+                });
+                object.position.x = pX;
+                object.position.y = pY;
+                object.position.z = pZ;
+                object.scale.set(0.002, 0.002, 0.002);
+                object.rotateX(Math.PI * 6 / 4);
+                object.rotateZ(Math.PI * dirY / 4);
+                //object.material.opacity = 0.3;
+                scene.add(object);
+            });
+        }
+
+        function main() {
+            //添加一个div元素
+            container = document.getElementById('webgl')
+            //document.body.appendChild(container);
+
+            scene = new THREE.Scene(); //创建一个新场景
+            //添加一个透视相机
+            camera = new THREE.PerspectiveCamera(30,
+                window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.set(100, 300, 100); //设置相机位置
+            camera.lookAt(new THREE.Vector3(0, 0, 0)); //让相机指向原点
+            //渲染
+            //antialias:true增加抗锯齿效果
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setClearColor(new THREE.Color(0x000000)); //设置窗口背景颜色为黑
+            renderer.setSize(container.offsetWidth, container.offsetHeight); //设置窗口尺寸
+            //将renderer关联到container，这个过程类似于获取canvas元素
+            container.appendChild(renderer.domElement);
+            //添加轨道控制器
+            //新建一个轨道控制器
+            orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+            orbitControls.target = new THREE.Vector3(0, 0, 0); //控制焦点
+            orbitControls.autoRotate = false; //将自动旋转关闭
+            clock = new THREE.Clock(); //用于更新轨道控制器
+            //给场景添加光源
+            //自然光
+            var ambientLight = new THREE.AmbientLight(0x606060);
+            scene.add(ambientLight);
+            //平行光源
+            var directionalLight = new THREE.DirectionalLight(0xffffff);
+            directionalLight.position.set(1, 0.75, 0.5).normalize();
+            scene.add(directionalLight);
+            plane();
+            // cube();
+            // sphere();
+            // cylinder();
+            //addOwnGeometry();
+            // addGeometry();
+            setTimeout('sendMessage("1")',2000);
+            //sendMessage("1");
+            //readFromDataToArray(myDataReceive);
+
+            // console.log(pointXs.length);
+            // for (var i = 0; i < pointXs.length; i++) {
+            //     // console.log(i,pointXs[i]);
+            //     // console.log(pointYs[i],pointZs[i])
+            //     addMulGeometry(pointXs[i], pointYs[i], pointZs[i]);
+            // }
+            //load3DS(0, 0, 0, 0);
+            //load3DS(-10, 0, -10, 2);
+        }
+
+        //创建一个平面
+        function plane() {
+            var planeGeo = new THREE.PlaneGeometry(100, 100, 10, 10); //创建平面
+            var planeMat = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0x666666,
+                wireframe: false
+            });
+            var planeMesh = new THREE.Mesh(planeGeo, planeMat); //创建网格模型
+            planeMesh.position.set(0, 0, -20); //设置平面的坐标
+            planeMesh.rotation.x = -0.5 * Math.PI; //将平面绕X轴逆时针旋转90度
+            scene.add(planeMesh); //将平面添加到场景中
+        }
+
+        //创建一个立方体
+        function cube() {
+            //THREE.CubeGeometry(width,height,depth,widthSegments,heightSegments, depthSegments)
+            var cubeGeo = new THREE.CubeGeometry(20, 20, 10, 15, 5, 5); //创建立方体
+            var cubeMat = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0x003300,
+                wireframe: false
+            });
+            var cubeMesh = new THREE.Mesh(cubeGeo, cubeMat); //创建立方体网格模型
+            cubeMesh.position.set(20, 10, 0); //设置立方体的坐标 几何中心
+            scene.add(cubeMesh); //将立方体添加到场景中
+        }
+
+        //创建一个球
+        function sphere() {
+            var sphereGeo = new THREE.SphereGeometry(16, 40, 40); //创建球体
+            var sphereMat = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0x0000FF,
+                wireframe: false
+            });
+            var sphereMesh = new THREE.Mesh(sphereGeo, sphereMat); //创建球体网格模型
+            sphereMesh.position.set(-25, 16, 0); //设置球的坐标
+            scene.add(sphereMesh); //将球体添加到场景
+        }
+
+        //创建圆柱体
+        function cylinder() {
+            //创建圆柱体
+            var cylinderGeo = new THREE.CylinderGeometry(15, 15, 40, 40, 40);
+            var cylinderMat = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0xFF6600,
+                wireframe: false
+            });
+            //创建圆柱体网格模型
+            var cylinderMesh = new THREE.Mesh(cylinderGeo, cylinderMat);
+            cylinderMesh.position.set(0, 20, -40); //设置圆柱坐标
+            scene.add(cylinderMesh); //向场景添加圆柱体
+        }
+
+        function addMulGeometry(arrX, arrZ, height) {
+            // var arrX=[4,0,0,2.5,4];
+            // var arrZ=[4,4,0,-2,0];
+            // var height=4;
+            var arrLength = arrX.length;
+            var geometry = new THREE.Geometry();
+            for (var i = 0; i < arrLength; i++) {
+                geometry.vertices.push(new THREE.Vector3(arrX[i], height, arrZ[i]));
+            }
+            for (var i = 0; i < arrLength; i++) {
+                geometry.vertices.push(new THREE.Vector3(arrX[i], 0, arrZ[i]));
+            }
+            for (var i = 0; i < arrLength; i++) {
+                if (i + arrLength + 1 == 2 * arrLength) {
+                    geometry.faces.push(new THREE.Face3(i, (i + 1) % arrLength, arrLength));
+                    geometry.faces.push(new THREE.Face3(i, arrLength, i + arrLength));
+                } else {
+                    geometry.faces.push(new THREE.Face3(i, (i + 1) % arrLength, i + arrLength + 1));
+                    geometry.faces.push(new THREE.Face3(i, i + arrLength + 1, i + arrLength));
+                }
+            }
+            for (var i = 0; i < arrLength - 2; i++) {
+                geometry.faces.push(new THREE.Face3(0, i + 2, i + 1));
+            }
+            for (var i = 0; i < arrLength - 2; i++) {
+                geometry.faces.push(new THREE.Face3(arrLength, arrLength + i + 1, arrLength + i + 2));
+            }
+            geometry.computeFaceNormals();
+            var material = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0x8DEEEE,
+                wireframe: false
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+        }
+
+        function addMulGeometryText() {
+            var arrX = [67.18841944111367, 65.17594444951699, 56.737672119402966, 58.75014711099965];
+            var arrZ = [157.04366246983577, 152.91279275128568, 155.91385194907826, 160.0447216678792];
+            var height = 24;
+            var arrLength = arrX.length;
+            var geometry = new THREE.Geometry();
+            for (var i = 0; i < arrLength; i++) {
+                geometry.vertices.push(new THREE.Vector3(arrX[i], height, arrZ[i]));
+            }
+            for (var i = 0; i < arrLength; i++) {
+                geometry.vertices.push(new THREE.Vector3(arrX[i], 0, arrZ[i]));
+            }
+            for (var i = 0; i < arrLength; i++) {
+                if (i + arrLength + 1 == 2 * arrLength) {
+                    geometry.faces.push(new THREE.Face3(i, (i + 1) % arrLength, arrLength));
+                    geometry.faces.push(new THREE.Face3(i, arrLength, i + arrLength));
+                } else {
+                    geometry.faces.push(new THREE.Face3(i, (i + 1) % arrLength, i + arrLength + 1));
+                    geometry.faces.push(new THREE.Face3(i, i + arrLength + 1, i + arrLength));
+                }
+            }
+            for (var i = 0; i < arrLength - 2; i++) {
+                geometry.faces.push(new THREE.Face3(0, i + 2, i + 1));
+            }
+            for (var i = 0; i < arrLength - 2; i++) {
+                geometry.faces.push(new THREE.Face3(arrLength, arrLength + i + 1, arrLength + i + 2));
+            }
+            geometry.computeFaceNormals();
+            var material = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0xffff00,
+                wireframe: false
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+        }
+
+        function addOwnGeometry() {
+            var arrX = [0, 0, 4, 4];
+            var arrY = [0, 4, 4, 0];
+            var height = 4;
+            var arrLength = arrX.length;
+            // 创建一个立方体
+            //    v6----- v5
+            //   /|      /|
+            //  v1------v0|
+            //  | |     | |
+            //  | |v7---|-|v4
+            //  |/      |/
+            //  v2------v3
+            var geometry = new THREE.Geometry();
+            //创建立方体的顶点
+            //[x,y,z]
+            //
+            //        |y
+            //        |
+            //     (0,0,0)------x
+            //       /
+            //      /z
+            var vertices = [
+                new THREE.Vector3(10, 10, 10), //v0
+                new THREE.Vector3(-10, 10, 10), //v1
+                new THREE.Vector3(-10, -10, 10), //v2
+                new THREE.Vector3(10, -10, 10), //v3
+                new THREE.Vector3(10, -10, -10), //v4
+                new THREE.Vector3(10, 10, -10), //v5
+                new THREE.Vector3(-10, 10, -10), //v6
+                new THREE.Vector3(-10, -10, -10) //v7
+            ];
+
+            geometry.vertices = vertices;
+            //创建立方的面
+            var faces = [
+                new THREE.Face3(0, 1, 2),
+                new THREE.Face3(0, 2, 3),
+                new THREE.Face3(0, 3, 4),
+                new THREE.Face3(0, 4, 5),
+                new THREE.Face3(1, 6, 7),
+                new THREE.Face3(1, 7, 2),
+                new THREE.Face3(6, 5, 4),
+                new THREE.Face3(6, 4, 7),
+                new THREE.Face3(5, 6, 1),
+                new THREE.Face3(5, 1, 0),
+                new THREE.Face3(3, 2, 7),
+                new THREE.Face3(3, 7, 4)
+            ];
+
+            geometry.faces = faces;
+            //geometry.faces.push(new THREE.Face4(0, 1, 2, 3));
+            // for(var i=0;i<arrLength;i++){
+            //     geometry.vertices.push(new THREE.Vector3(arrX[i], arrY[i], height));
+            // }
+            // for(var i=0;i<arrLength;i++){
+            //     geometry.vertices.push(new THREE.Vector3(arrX[i], arrY[i], 0));
+            // }
+
+            // for(var i=1;i<=arrLength-1;i++){
+            //     geometry.faces.push(new THREE.Face3(0, i, (i+1)%arrLength));
+            // }
+
+            // for(var i=0;i<arrLength-1;i++){
+            //     var temp=[i,(i+1)%arrLength,i+arrLength,(i+arrLength+1)]
+            //     // temp[3]=temp[1]+arrLength
+            //     geometry.faces.push(new THREE.Face3(temp[0], temp[1], temp[2]));
+            //     geometry.faces.push(new THREE.Face3(temp[0], temp[1], temp[3]));
+            //     geometry.faces.push(new THREE.Face3(temp[1], temp[2], temp[3]));
+
+            // }
+            // var temp=[0,arrLength-1,arrLength,arrLength*2-1]
+            // geometry.faces.push(new THREE.Face3(temp[0], temp[1], temp[2]));
+            // geometry.faces.push(new THREE.Face3(temp[0], temp[1], temp[3]));
+            // geometry.faces.push(new THREE.Face3(temp[1], temp[2], temp[3]));
+
+            // for(var i=1;i<=arrLength-2;i++){
+            //     geometry.faces.push(new THREE.Face3(0+arrLength, i+arrLength, i+1+arrLength));
+            // }
+            // for(var i=0;i<=arrLength-2;i++){
+            //     geometry.faces.push(new THREE.Face3(i, i+1, (i+2)%arrLength));
+            // }
+            // for(var i=0;i<=arrLength-2;i++){
+            //     geometry.faces.push(new THREE.Face3(i+arrLength, i+1+arrLength, (i+2)%arrLength+arrLength));
+            // }
+            geometry.computeFaceNormals();
+            var material = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0xffff00,
+                wireframe: false
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+        }
+
+        function addGeometry() {
+            var geometry = new THREE.Geometry();
+            // 设置顶点位置
+            // 顶部4顶点
+            geometry.vertices.push(new THREE.Vector3(-1, 2, -1));
+            geometry.vertices.push(new THREE.Vector3(1, 2, -1));
+            geometry.vertices.push(new THREE.Vector3(1, 2, 1));
+            geometry.vertices.push(new THREE.Vector3(-1, 2, 1));
+            // 底部4顶点
+            geometry.vertices.push(new THREE.Vector3(-2, 0, -2));
+            geometry.vertices.push(new THREE.Vector3(2, 0, -2));
+            geometry.vertices.push(new THREE.Vector3(2, 0, 2));
+            geometry.vertices.push(new THREE.Vector3(-2, 0, 2));
+
+            // 设置顶点连接情况
+            // 顶面
+            geometry.faces.push(new THREE.Face3(0, 1, 3));
+            geometry.faces.push(new THREE.Face3(1, 2, 3));
+            //          geometry.faces.push(new THREE.Face4(0, 1, 2, 3));
+            // 底面
+            geometry.faces.push(new THREE.Face3(4, 5, 6));
+            geometry.faces.push(new THREE.Face3(5, 6, 7));
+            //          geometry.faces.push(new THREE.Face4(4, 5, 6, 7));
+            // 侧面
+            geometry.faces.push(new THREE.Face3(1, 5, 6));
+            geometry.faces.push(new THREE.Face3(6, 2, 1));
+            geometry.faces.push(new THREE.Face3(2, 6, 7));
+            geometry.faces.push(new THREE.Face3(7, 3, 2));
+            geometry.faces.push(new THREE.Face3(3, 7, 0));
+            geometry.faces.push(new THREE.Face3(7, 4, 0));
+            geometry.faces.push(new THREE.Face3(0, 4, 5));
+            geometry.faces.push(new THREE.Face3(0, 5, 1));
+            var material = new THREE.MeshLambertMaterial({ //创建材料
+                color: 0xffff00,
+                wireframe: false
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+        }
+
+        //渲染
+        function render() {
+            delta = clock.getDelta();
+            orbitControls.update(delta);
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+    </script>
+
+</body>
+
+</html>
