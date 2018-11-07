@@ -14,8 +14,10 @@ public:
 	double Ymax = 0.0;
 	double Zmin = 0.0;
 	double Zmax = 0.0;
+    double denominator;
     double *hightArr = new double[20000];
 	vector<Point*> allPointList;
+    vector<QString> pathName;
 public:
 	FilePoint();
 	~FilePoint();
@@ -25,10 +27,10 @@ public:
 	void expendPointList(Point *point) {
 		allPointList.push_back(point);
 	}
-	void uniformlize() {
+    void uniformlize(double denominator) {
 		for (int i = 0; i < allPointList.size(); i++) {
-			allPointList[i]->x = (allPointList[i]->x - Xmin) / (Xmax - Xmin);
-			allPointList[i]->y = (allPointList[i]->y - Ymin) / (Xmax - Xmin);
+            allPointList[i]->x = (allPointList[i]->x - Xmin) / (denominator);
+            allPointList[i]->y = (allPointList[i]->y - Ymin) / (denominator);
 			allPointList[i]->z = allPointList[i]->z / 600.0;
 		}
 	}
@@ -39,4 +41,12 @@ public:
             allPointList[i]->z = allPointList[i]->z / 800*shiftZ;
 		}
 	}
+
+    void uniformlize(double shift, double shiftZ,double denominator) {
+        for (int i = 0; i < allPointList.size(); i++) {
+            allPointList[i]->x = (allPointList[i]->x - (Xmax + Xmin) / 2) / (denominator)*shift;
+            allPointList[i]->y = (allPointList[i]->y - (Ymax + Ymin) / 2) / (denominator)*shift;
+            allPointList[i]->z = allPointList[i]->z / 800*shiftZ;
+        }
+    }
 };

@@ -34,7 +34,8 @@ private Q_SLOTS:
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
     void socketDisconnected();
-    void updatemapMap();
+    void updateBuilding();
+    void updateRoad();
     QString rayTracing();
 private:
     QWebSocketServer *m_pWebSocketServer;
