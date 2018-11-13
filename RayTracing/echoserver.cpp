@@ -63,6 +63,7 @@ void EchoServer::processTextMessage(QString message)
             //QString bound = '';
         }else if(message == "2"){
 //          射线追踪
+
             QString data = rayTracing();
             pClient->sendTextMessage(data);
         }else if(message == '3'){
@@ -78,10 +79,38 @@ void EchoServer::processTextMessage(QString message)
             map.insert("xmin",xmin);
             map.insert("ymax",ymax);
             map.insert("ymin",ymin);
-            QJsonObject qjss=QJsonObject::fromVariantMap(map);
+            QJsonObject qjss = QJsonObject::fromVariantMap(map);
             QJsonDocument doc(qjss);
             QString strJson(doc.toJson(QJsonDocument::Compact));
             pClient->sendTextMessage(strJson);
+        }else{//Tx Rx
+
+            QJsonDocument jsonDocument = QJsonDocument::fromJson(message.toLocal8Bit().data());
+               if(jsonDocument.isNull())
+               {
+                   qDebug()<< "String NULL"<< message.toLocal8Bit().data();
+               }
+               QJsonObject jsonObject = jsonDocument.object();
+
+               QString type = jsonObject["type"].toString();
+               if(type == "tx"){
+                   double longitude =  jsonObject["longitude"].toDouble();
+                   double latitude=  jsonObject["latitude"].toDouble();
+                   double x = (longitude - xmin)/(xmax - xmin);
+                   double y = (latitude - ymin)/(xmax - xmin);
+                   receivedTx = new Node(x,y);
+               }else if(type == "rx"){
+                   double longitude =  jsonObject["longitude"].toDouble();
+                   double latitude=  jsonObject["latitude"].toDouble();
+                   double x = (longitude - xmin)/(xmax - xmin);
+                   double y = (latitude - ymin)/(xmax - xmin);
+                   receivedRx = new Node(x, y);
+               }else{
+                   qDebug() << "other type..";
+               }
+
+
+
         }
 
     }
@@ -115,7 +144,7 @@ void EchoServer::socketDisconnected()
 
 QString EchoServer::rayTracing(){
     FilePoint *filePoint = new FilePoint();
-    FileManager *fileManager = new FileManager();
+    FileManager *fileManager = new FileManager("/Users/wuqi/raytracing/rayTracing1.1/RayTracing/BUILDING_nanjing.shp","/Users/wuqi/raytracing/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
     fileManager->readDbfFile(filePoint);
     fileManager->readShpFile(filePoint);
     qDebug() <<"xmax:"<<filePoint->Xmax;
@@ -124,15 +153,15 @@ QString EchoServer::rayTracing(){
     qDebug() <<"ymin"<<filePoint->Ymin;
     filePoint->uniformlize(xmax - xmin);
     Scene* scene = new Scene(filePoint->allPointList, filePoint->index);
-    Node* rx = new Node(13.5, 6.2, 0.0, true);
+    Node* rx = new Node(receivedRx->x * 30, receivedRx->y * 30, 0.0, true);
     Mesh* mesh = new Mesh(30, scene, rx);
+    //射线追踪器
     Tracer*  tracer = new Tracer(mesh);
-    Node* source = nullptr;
     //source = new  Node(14.5, 7.5, 16);
     //tracer->traceAll(source);
     for (double i = 0; i < 360;i+= 2)
     {
-        source = new Node(14.5, 7.5,i);
+        Node* source = new Node(receivedTx->x * mesh->size, receivedTx->y * mesh->size, i);
         tracer->srcList.push_back(source);
         source->vSpread[0] = -90 * 3.14 / 180;
         source->vSpread[1] = 90 * 3.14 / 180;
@@ -152,9 +181,11 @@ QString EchoServer::rayTracing(){
         for(iter = nodes.begin(); iter != nodes.end(); iter++){
             QMap<QString,QVariant> map;
             Node* node = *iter;
-            map.insert("x", (node->x / mesh->size - 0.5) * 50);
-            map.insert("y", (node->y /mesh->size- 0.5) * 50);
-            map.insert("z", (node->z /mesh->size) * 3);
+            //将node的坐标映射成前段展示的坐标
+            Point* point = filePoint->resume(node,xmax - xmin,mesh->size,80);
+            map.insert("x", (point->x));
+            map.insert("y", (point->y));
+            map.insert("z", (point->z));
             list.append(QVariant(map));
         }
         data.insert(QString::number(i,10),QVariant(list));
@@ -169,7 +200,7 @@ QString EchoServer::rayTracing(){
 void EchoServer::updateRoad(){
     mapMap.clear();
     FilePoint *filePoint = new FilePoint();
-    FileManager *fileManager = new FileManager("G:/nanjing/R.shp","G:/nanjing/R.dbf");
+    FileManager *fileManager = new FileManager("./R.shp","./R.dbf");
     fileManager->readRoadDbf(filePoint);
     fileManager->readRoadShp(filePoint);
     qDebug() <<"xmax:"<<filePoint->Xmax;
@@ -199,7 +230,7 @@ void EchoServer::updateRoad(){
 void EchoServer::updateBuilding(){
     mapMap.clear();
     FilePoint *filePoint = new FilePoint();
-    FileManager *fileManager = new FileManager();
+    FileManager *fileManager = new FileManager("/Users/wuqi/raytracing/rayTracing1.1/RayTracing/BUILDING_nanjing.shp","/Users/wuqi/raytracing/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
     fileManager->readDbfFile(filePoint);
     fileManager->readShpFile(filePoint);
     qDebug() <<"xmax:"<<filePoint->Xmax;
@@ -211,7 +242,7 @@ void EchoServer::updateBuilding(){
     xmin =filePoint->Xmin;
     ymax =filePoint->Ymax;
     ymin =filePoint->Ymin;
-    filePoint->uniformlize(80,6,xmax - xmin);//(0,1)
+    filePoint->uniformlize(80,50,xmax - xmin);//(0,1)
     Scene *scene = new Scene(filePoint->allPointList, filePoint->index);
     QJsonObject qjs;
     for(int i = 0; i < scene->objList.size(); i++){

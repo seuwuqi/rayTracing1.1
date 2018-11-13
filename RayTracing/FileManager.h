@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "FilePoint.h"
 #include <iostream>
-
+#include <QDebug>
 class FileManager
 {
 private:
@@ -27,6 +27,7 @@ public:
     void readRoadShpHead(FilePoint* filePoint){
         if (srcFile == nullptr)
         {
+            qDebug() << "打开文件失败";
             return;
         }
         int FileCode;

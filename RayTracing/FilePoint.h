@@ -27,6 +27,8 @@ public:
 	void expendPointList(Point *point) {
 		allPointList.push_back(point);
 	}
+
+
     void uniformlize(double denominator) {
 		for (int i = 0; i < allPointList.size(); i++) {
             allPointList[i]->x = (allPointList[i]->x - Xmin) / (denominator);
@@ -34,11 +36,21 @@ public:
 			allPointList[i]->z = allPointList[i]->z / 600.0;
 		}
 	}
+
+
+
+    Point* resume(Point* point, double denominator, double k,double shift){//网格运算的坐标-->前段显示的坐标
+        double x = ((point->x / k* denominator + Xmin) -(Xmax + Xmin) / 2 ) / (Xmax - Xmin)*shift;
+        double y = ( (point->y /k * denominator + Ymin)- (Ymax + Ymin) / 2) / (Xmax - Xmin)*shift;;
+        double z = point->z/k;
+        return new Point(x, y ,z);
+    }
+
 	void uniformlize(double shift, double shiftZ) {
 		for (int i = 0; i < allPointList.size(); i++) {
 			allPointList[i]->x = (allPointList[i]->x - (Xmax + Xmin) / 2) / (Xmax - Xmin)*shift;
 			allPointList[i]->y = (allPointList[i]->y - (Ymax + Ymin) / 2) / (Xmax - Xmin)*shift;
-            allPointList[i]->z = allPointList[i]->z / 800*shiftZ;
+            allPointList[i]->z = allPointList[i]->z / 600*shiftZ;
 		}
 	}
 
